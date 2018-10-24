@@ -21,6 +21,7 @@ static void getvar_version_baseband(char *var_parameter, char *response);
 static void getvar_product(char *var_parameter, char *response);
 static void getvar_platform(char *var_parameter, char *response);
 static void getvar_current_slot(char *var_parameter, char *response);
+static void getvar_ubootenv(char *var_parameter, char *response);
 #if CONFIG_IS_ENABLED(FASTBOOT_FLASH)
 static void getvar_has_slot(char *var_parameter, char *response);
 #endif
@@ -63,6 +64,9 @@ static const struct {
 	}, {
 		.variable = "current-slot",
 		.dispatch = getvar_current_slot
+	}, {
+		.variable = "uboot",
+		.dispatch = getvar_ubootenv
 #if CONFIG_IS_ENABLED(FASTBOOT_FLASH)
 	}, {
 		.variable = "has-slot",
@@ -128,6 +132,16 @@ static int getvar_get_part_info(const char *part_name, char *response,
 static void getvar_version(char *var_parameter, char *response)
 {
 	fastboot_okay(FASTBOOT_VERSION, response);
+}
+
+static void getvar_ubootenv(char *var_parameter, char *response)
+{
+	const char *value = env_get(var_parameter);
+
+	if (value)
+		fastboot_okay(value, response);
+	else
+		fastboot_fail("Variable is not set", response);
 }
 
 static void getvar_version_bootloader(char *var_parameter, char *response)
